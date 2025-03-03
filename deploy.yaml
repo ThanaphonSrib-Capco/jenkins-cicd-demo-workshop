@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ###WORKSHOP_NAME###
+  namespace: aep-2025
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ###WORKSHOP_NAME###
+  template:
+    metadata:
+      labels:
+        app: ###WORKSHOP_NAME###
+    spec:
+      containers:
+        - name: ###WORKSHOP_NAME###
+          image: ###REGISTRY_HOSTNAME###/aep/###WORKSHOP_NAME###:###BUILD_NUMBER###
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ###WORKSHOP_NAME###
+  namespace: aep-2025
+spec:
+  selector:
+    app: ###WORKSHOP_NAME###
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /\$1
+  name: ###WORKSHOP_NAME###-ing
+  namespace: aep-2025
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: ###WORKSHOP_NAME###
+            port:
+              number: 80
+        path: /###WORKSHOP_NAME###
+        pathType: Prefix
