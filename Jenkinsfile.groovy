@@ -96,10 +96,21 @@ spec:
             container('kubectl') {
             sh '''
                 kubectl apply -f deploy.yaml
+                WORKSHOP_RESULT="${JENKINS_URL/jenkins/${WORKSHOP_NAME}}"
+                echo ${WORKSHOP_RESULT}
             '''
             }
         }
       }
+    }
+    stage('Review Result') {
+      steps {
+        sh '''
+            set +x  # Disable command printing
+            WORKSHOP_RESULT=$(echo "${JENKINS_URL}" | sed "s|jenkins|${WORKSHOP_NAME}|")
+            echo "Review result at: ${WORKSHOP_RESULT}"
+        '''
+        }
     }
   }
 }
