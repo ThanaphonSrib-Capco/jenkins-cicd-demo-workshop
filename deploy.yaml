@@ -36,6 +36,7 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /\$1
   name: ###WORKSHOP_NAME###-ing
   namespace: aep-2025
 spec:
