@@ -96,8 +96,6 @@ spec:
             container('kubectl') {
             sh '''
                 kubectl apply -f deploy.yaml
-                WORKSHOP_RESULT="${JENKINS_URL/jenkins/${WORKSHOP_NAME}}"
-                echo ${WORKSHOP_RESULT}
             '''
             }
         }
