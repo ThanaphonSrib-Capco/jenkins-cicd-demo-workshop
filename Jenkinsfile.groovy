@@ -44,19 +44,15 @@ spec:
     }
     stage('Build Source Code') {
       steps {
-        sh '''
         echo "Create html folder..."
-        mkdir html
+        sh 'mkdir html'
         echo "Copy html and image into html folder..."
-        cp index.html hero.png html
-        '''
+        sh 'cp index.html hero.png html'
       }
     }
     stage('Automate Test') {
       steps {
-        sh '''
         echo "Run test..."
-        '''
         junit 'test-result-mock.xml'
       }
     }
@@ -64,15 +60,15 @@ spec:
       steps {
         container('dind') {
             withCredentials([string(credentialsId: 'harbor-registry-hostname', variable: 'registry')]) {
-            sh '''
             echo "Build container..."
+            sh '''
             docker build -t ${WORKSHOP_NAME}/landing-page .
             echo "Push container..."
             docker tag ${WORKSHOP_NAME}/landing-page ${registry}/aep/${WORKSHOP_NAME}:${BUILD_NUMBER}
             '''
                 withCredentials([usernamePassword(credentialsId: 'docker-credential', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh '''
                     echo "Login to harbor..."
+                    sh '''
                         docker login -u ${USERNAME} -p ${PASSWORD} ${registry}
                         echo "Push container..."
                         docker push ${registry}/aep/${WORKSHOP_NAME}:${BUILD_NUMBER}
@@ -85,14 +81,14 @@ spec:
     stage('Deploy to Kubernetes') {
       steps {
             withCredentials([string(credentialsId: 'harbor-registry-hostname', variable: 'registry')]) {
-            sh '''
             echo "Replace image in deployment file..."
+            sh '''
             sed -i "s|###REGISTRY_HOSTNAME###|${registry}|g" deploy.yaml
             sed -i "s|###WORKSHOP_NAME###|${WORKSHOP_NAME}|g" deploy.yaml
             sed -i "s|###BUILD_NUMBER###|${BUILD_NUMBER}|g" deploy.yaml
             cat deploy.yaml
-            echo "Deploy to kubernetes..."
             '''
+            echo "Deploy to kubernetes..."
             container('kubectl') {
             sh '''
                 kubectl apply -f deploy.yaml
