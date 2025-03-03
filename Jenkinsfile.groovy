@@ -21,9 +21,17 @@ spec:
     volumeMounts:
       - name: docker-graph-storage
         mountPath: /var/lib/docker
+  - name: kubectl
+    image: bitnami/kubectl:1.30.4
+    command:
+    - cat
+    tty: true
+    securityContext:
+      runAsUser: 1000
   volumes:
     - name: docker-graph-storage
       emptyDir: {}
+  serviceAccount: jenkins
 '''
       showRawYaml false
     }
@@ -70,6 +78,25 @@ spec:
                         docker push ${registry}/aep/${WORKSHOP_NAME}:${BUILD_NUMBER}
                     '''
                 }
+            }
+        }
+      }
+    }
+    stage('Deploy to Kubernetes') {
+      steps {
+            withCredentials([string(credentialsId: 'harbor-registry-hostname', variable: 'registry')]) {
+            sh '''
+            echo "Replace image in deployment file..."
+            sed -i "s|###REGISTRY_HOSTNAME###|${registry}|g" deploy.yaml
+            sed -i "s|###WORKSHOP_NAME###|${WORKSHOP_NAME}|g" deploy.yaml
+            sed -i "s|###BUILD_NUMBER###|${BUILD_NUMBER}|g" deploy.yaml
+            cat deploy.yaml
+            echo "Deploy to kubernetes..."
+            '''
+            container('kubectl') {
+            sh '''
+                kubectl apply -f deploy.yaml
+            '''
             }
         }
       }
