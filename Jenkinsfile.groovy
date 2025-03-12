@@ -1,6 +1,6 @@
 pipeline {
   environment { 
-    WORKSHOP_NAME = 'sarawukl'
+    WORKSHOP_NAME = 'ThanaphonSrib-Capco'
   }
   agent {
     kubernetes {
@@ -39,7 +39,7 @@ spec:
   stages {
     stage('Get Source Code') {
       steps {
-        git url: 'https://github.com/sarawukl/jenkins-cicd-demo-workshop', branch: 'main'
+        git url: 'https://github.com/ThanaphonSrib-Capco/jenkins-cicd-demo-workshop', branch: 'main'
       }
     }
     stage('Build Source Code') {
